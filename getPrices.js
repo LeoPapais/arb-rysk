@@ -6,6 +6,8 @@ import pkg from "ethers-multicall-provider"
 
 import settings from './settings.js'
 import pricerAbi from './beyondPricerAbi.json' assert { type: "json" }
+import priceFeedAbi from './priceFeedAbi.json' assert { type: "json" }
+import volatilityFeedAbi from './volatilityFeedAbi.json' assert { type: "json" }
 import findPositiveSpreads from './verticalSpread.js'
 
 const { MulticallWrapper } = pkg
@@ -15,11 +17,15 @@ const {
   providerUrl,
   beyondPricerAddress,
   usdc,
-  weth
+  weth,
+  priceFeedAddress,
+  volatilityFeedAddress,
 } = settings.goerli
 
 const provider = MulticallWrapper.wrap(new ethers.providers.JsonRpcProvider(providerUrl))
 const contract = new ethers.Contract(beyondPricerAddress, pricerAbi, provider)
+const priceFeed = new ethers.Contract(priceFeedAddress, priceFeedAbi, provider)
+const volatilityFeed = new ethers.Contract(volatilityFeedAddress, volatilityFeedAbi, provider)
 
 const fetchGraphql = async query => {
   return fetch(subgraphUrl, {
@@ -93,51 +99,26 @@ const getPrices = async (option) => {
     option.netDHVExposure
   )
 
-  /*
-  it needs to get underliyng price by calling getNormalizedRate from
-  0xf7B1e3a7856067BEcee81FdE0DD38d923b99554D (price feed) this address with params underlying (weth) and strikeAsset (usdc)
-  then call:
-  (uint256 iv, uint256 forward) = _getVolatilityFeed().getImpliedVolatilityWithForward(
-			_optionSeries.isPut,
-			underlyingPrice,
-			_optionSeries.strike,
-			_optionSeries.expiration
-		);
-
-  where volatility feed is 0xf058Fe438AAF22617C30997579E89176e19635Dc 
-
-  the options compute address is 
-		(uint256 vanillaPremium, int256 delta) = OptionsCompute.quotePriceGreeks(
-			_optionSeries,
-			isSell,
-			bidAskIVSpread,
-			riskFreeRate,
-			iv,
-			forward
-		);
-  */
-  const [[sellPriceH], [buyPriceH]] = await Promise.all([
+  const [[sellPriceH, sellTotalDeltaH, sellTotalFeesH], [buyPriceH, buyTotalDeltaH, buyTotalFeesH]] = await Promise.all([
     sellPrice,
     buyPrice
   ])
+
   return {
     sellPrice: new BigNumber(sellPriceH.toString()).div('1e6').toNumber(),
-    buyPrice: new BigNumber(buyPriceH.toString()).div('1e6').toNumber()
+    buyPrice: new BigNumber(buyPriceH.toString()).div('1e6').toNumber(),
+    delta: new BigNumber(sellTotalDeltaH.toString()).div(oneToken).toNumber(),
   }
 }
 
 const fetchPrices = async () => {
   const series = await getSeries()
   const formattedSeries = formatSeries(series)
-  console.time('prices')
   const prices = await Promise.all(formattedSeries.map(getPrices))
-  console.timeEnd('prices')
   return formattedSeries.map((s, i) => ({
     ...s,
     ...prices[i]
   }))
 }
 
-fetchPrices()
-.then(findPositiveSpreads)
-.then(console.log)
+export default fetchPrices
