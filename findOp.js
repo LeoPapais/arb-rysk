@@ -1,6 +1,6 @@
-import fetchPrices from "./getPrices";
-import findPositiveSpreads from "./findOp";
-import findOptimalAmount from "./maximizeProfit";
+import fetchPrices from "./getPrices.js";
+import findPositiveSpreads from "./verticalSpread.js";
+import findOptimalAmount from "./maximizeProfit.js";
 
 const main = async () => {
   const prices = await fetchPrices();

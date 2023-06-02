@@ -36,27 +36,25 @@ const getPricerData = async () => {
 }
 
 const findOptimalAmount = async (buyRaw, sellRaw, action) => {
-  const pricer = getPricerData()
+  const pricer = await getPricerData()
   const buy = {
     ...buyRaw,
-    delta: new BigNumber(buyRaw.delta).div('1e18').toNumber(),
+    delta: new BigNumber(buyRaw.delta).toNumber(),
     buyPrice: new BigNumber(buyRaw.buyPrice).toNumber(),
-    delta: new BigNumber(buyRaw.delta).div('1e18').toNumber(),
     netDHVExposure: new BigNumber(buyRaw.netDHVExposure).div('1e18').toNumber(),
   }
 
   const sell = {
     ...sellRaw,
-    delta: new BigNumber(sellRaw.delta).div('1e18').toNumber(),
+    delta: new BigNumber(sellRaw.delta).toNumber(),
     sellPrice: new BigNumber(sellRaw.sellPrice).toNumber(),
-    delta: new BigNumber(sellRaw.delta).div('1e18').toNumber(),
     netDHVExposure: new BigNumber(sellRaw.netDHVExposure).div('1e18').toNumber(),
   }
 
-  return findMaxProfit(buy, sell, pricer)
+  return findMaxProfit(buy, sell, pricer, action)
 }
 
-function findMaxProfit(buy, sell, pricer) {
+function findMaxProfit(buy, sell, pricer, action) {
   const buyDeltaBandIndex = Math.abs(Math.floor(buy.delta * 100 / pricer.deltaBandWidth))
   const sellDeltaBandIndex = Math.abs(Math.floor(sell.delta * 100 / pricer.deltaBandWidth))
   const buyGradMultiplier = buy.type === 'CALL' ? pricer.callSlippageGradientMultipliers[buyDeltaBandIndex] : pricer.putSlippageGradientMultipliers[buyDeltaBandIndex]
@@ -153,6 +151,9 @@ function findMaxProfit(buy, sell, pricer) {
   const profit = L(optimalAmount, baseSellPrice, baseBuyPrice)
 
   return {
+    buy,
+    sell,
+    action,
     profit,
     optimalAmount
   }
