@@ -6,7 +6,7 @@ function findPositiveSpreads(options) {
 
   // Loop through the array, comparing each option with every other option
   for (let i = 0; i < options.length; i++) {
-    for (let j = i + 1; j < options.length; j++) {
+    for (let j = 0; j < options.length; j++) {
       // Check if they are the same type (CALL or PUT), have the same expiration date and different strike price
       const sameType = options[i].type === options[j].type
       const sameExpiration = options[i].expiration === options[j].expiration
@@ -35,7 +35,7 @@ function findPositiveSpreads(options) {
     }
   }
 
-  return positiveSpreads.sort((a, b) => b.netCost - a.netCost);
+  return positiveSpreads.sort((a, b) => -b.netCost + a.netCost);
 }
 
 export default findPositiveSpreads

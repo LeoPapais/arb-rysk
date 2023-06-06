@@ -1,3 +1,6 @@
+import dotenv from 'dotenv'
+dotenv.config()
+
 const settings = {
   goerli: {
     providerUrl: 'https://arbitrum-goerli.rpc.thirdweb.com',
@@ -7,6 +10,11 @@ const settings = {
     weth: '0x3b3a1dE07439eeb04492Fa64A889eE25A130CDd3',
     priceFeedAddress: '0xf7B1e3a7856067BEcee81FdE0DD38d923b99554D',
     volatilityFeedAddress: '0xf058Fe438AAF22617C30997579E89176e19635Dc',
+    optionExchangeAddress: '0xb672fE86693bF6f3b034730f5d2C77C8844d6b45',
+    marginCalculatorAddress: '0xcD270e755C2653e806e16dD3f78E16C89B7a1c9e',
+    myWallet: '0x3dcb7aa05550439269aa4b6ec191c658440d22e0',
+    controller: '0x11a602a5F5D823c103bb8b7184e22391Aae5F4C2',
+    privateKey: process.env.goerli_private_key,
   },
   arbMainnet: {
   }

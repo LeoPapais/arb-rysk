@@ -6,9 +6,6 @@ import pkg from "ethers-multicall-provider"
 
 import settings from './settings.js'
 import pricerAbi from './beyondPricerAbi.json' assert { type: "json" }
-import priceFeedAbi from './priceFeedAbi.json' assert { type: "json" }
-import volatilityFeedAbi from './volatilityFeedAbi.json' assert { type: "json" }
-import findPositiveSpreads from './verticalSpread.js'
 
 const { MulticallWrapper } = pkg
 
@@ -18,14 +15,10 @@ const {
   beyondPricerAddress,
   usdc,
   weth,
-  priceFeedAddress,
-  volatilityFeedAddress,
 } = settings.goerli
 
 const provider = MulticallWrapper.wrap(new ethers.providers.JsonRpcProvider(providerUrl))
 const contract = new ethers.Contract(beyondPricerAddress, pricerAbi, provider)
-const priceFeed = new ethers.Contract(priceFeedAddress, priceFeedAbi, provider)
-const volatilityFeed = new ethers.Contract(volatilityFeedAddress, volatilityFeedAbi, provider)
 
 const fetchGraphql = async query => {
   return fetch(subgraphUrl, {
@@ -113,8 +106,10 @@ const getPrices = async (option) => {
 
 const fetchPrices = async () => {
   const series = await getSeries()
+  console.log(`Found ${series.length} series`)
   const formattedSeries = formatSeries(series)
   const prices = await Promise.all(formattedSeries.map(getPrices))
+  console.log(`Fetched ${prices.length} prices`)
   return formattedSeries.map((s, i) => ({
     ...s,
     ...prices[i]

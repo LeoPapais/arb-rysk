@@ -50,7 +50,6 @@ const findOptimalAmount = async (buyRaw, sellRaw, action) => {
     sellPrice: new BigNumber(sellRaw.sellPrice).toNumber(),
     netDHVExposure: new BigNumber(sellRaw.netDHVExposure).div('1e18').toNumber(),
   }
-
   return findMaxProfit(buy, sell, pricer, action)
 }
 
@@ -150,9 +149,17 @@ function findMaxProfit(buy, sell, pricer, action) {
 
   const profit = L(optimalAmount, baseSellPrice, baseBuyPrice)
 
+  const buyWithSlippage = {
+    ...buy,
+    buyPrice: baseBuyPrice * c(optimalAmount, buyGradient, buyDHV) * optimalAmount, 
+  }
+  const sellWithSlippage = {
+    ...sell,
+    sellPrice: baseSellPrice * v(optimalAmount, sellGradient, sellDHV) * optimalAmount,
+  }
   return {
-    buy,
-    sell,
+    buy: buyWithSlippage,
+    sell: sellWithSlippage,
     action,
     profit,
     optimalAmount
