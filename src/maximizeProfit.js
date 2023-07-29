@@ -125,12 +125,10 @@ function findMaxProfit(buy, sell, pricer, action) {
         let fderiv = LDoublePrime(a, P, Q);
   
         if (Math.abs(fval / fderiv) < epsilon) {
-          // se o valor da função é pequeno o suficiente, assumimos que encontramos a raiz
             console.log("converged!!!!");
             break;
         }
   
-        // atualize a estimativa usando a fórmula do método de Newton
         a = a - fval / fderiv;
         iter++;
     }

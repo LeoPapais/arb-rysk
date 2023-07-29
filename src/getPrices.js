@@ -5,7 +5,7 @@ import {ethers} from 'ethers'
 import pkg from "ethers-multicall-provider"
 
 import settings from './settings.js'
-import pricerAbi from './beyondPricerAbi.json' assert { type: "json" }
+import pricerAbi from '../abi/beyondPricerAbi.json' assert { type: "json" }
 
 const { MulticallWrapper } = pkg
 
@@ -31,7 +31,7 @@ const fetchGraphql = async query => {
 const getSeries = async () => {
   const query = `
     {
-      series {   
+      series (first: 1000, where: { isBuyable: true, isSellable: true} ) {   
         id 
         expiration 
         netDHVExposure 
@@ -47,7 +47,7 @@ const getSeries = async () => {
 }
 
 const formatSeries = series => series
-  .filter(s => s.isBuyable || s.isSellable)
+  // .filter(s => s.isBuyable || s.isSellable)
   .filter(s => parseInt(s.expiration) > moment().unix())
   .map(s => {
     const date = moment(parseInt(s.expiration) * 1000).format('YYYY-MM-DD')

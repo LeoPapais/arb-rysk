@@ -15,7 +15,7 @@ function findPositiveSpreads(options) {
       const debt = parseFloat(options[i].buyPrice) - parseFloat(options[j].sellPrice)
       if (isVerticalSpread && debt < 0) {
         // Check if the cost of buying the lower strike option is less than the cost of selling the higher strike option
-        if (options[i].type === 'CALL' && options[i].strike < options[j].strike) {
+        if (options[i].type === 'CALL' && options[i].strike <= options[j].strike) {
           positiveSpreads.push({
             buy: options[i],
             sell: options[j],
@@ -23,7 +23,7 @@ function findPositiveSpreads(options) {
             action: `buy call at strike ${options[i].strike}  for ${options[i].buyPrice} and sell  at strike ${options[j].strike}  for ${options[j].sellPrice}`
           });
         }
-        if (options[i].type === 'PUT' && options[i].strike > options[j].strike) {
+        if (options[i].type === 'PUT' && options[i].strike >= options[j].strike) {
           positiveSpreads.push({
             buy: options[i],
             sell: options[j],
